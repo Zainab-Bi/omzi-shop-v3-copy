@@ -81,6 +81,12 @@ function clearCart() {
 
     updateCartCount();
 }
-
-
 displayCart();
+window.addEventListener("pageshow", () => {
+
+    cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    displayCart();
+
+    updateCartCount();
+});
