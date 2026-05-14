@@ -229,12 +229,23 @@ function addReview(index) {
 
 /* CART */
 function addToCart(index) {
+
     let products = JSON.parse(localStorage.getItem("products")) || [];
+
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
     cart.push(products[index]);
 
     localStorage.setItem("cart", JSON.stringify(cart));
+
+    updateCartCount();
+}
+
+function updateCartCount() {
+
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    document.getElementById("cart-count").innerText = cart.length;
 }
 
 /* INIT */
@@ -250,6 +261,8 @@ function updateWishlistCount() {
 }
 
 updateWishlistCount();
+updateCartCount();
 </script>
+
 </body>
 </html>
