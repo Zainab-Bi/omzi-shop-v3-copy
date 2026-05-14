@@ -262,6 +262,10 @@ function updateWishlistCount() {
 
 updateWishlistCount();
 updateCartCount();
+
+window.addEventListener("pageshow", function () {
+    location.reload();
+});
 </script>
 
 </body>
