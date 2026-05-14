@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Order Success</title>
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            padding: 50px;
+        }
+
+        .box {
+            padding: 20px;
+            border: 2px solid green;
+            display: inline-block;
+            border-radius: 10px;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px;
+            background: black;
+            color: white;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h1>🎉 Order Placed!</h1>
+    <p>Thank you for shopping with Omzi</p>
+
+    <button onclick="goHome()">Go Home</button>
+</div>
+
+<script>
+function goHome() {
+    window.location.href = "index.html";
+}
+</script>
+<script src="script.js"></script>
+
+</body>
+</html>

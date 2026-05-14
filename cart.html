@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Omzi Cart</title>
+
+<style>
+body {
+    font-family: Arial;
+    padding: 20px;
+    background: #f9f9f9;
+}
+
+.cart-item {
+    display: flex;
+    align-items: center;
+    background: white;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+}
+
+.cart-item img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    margin-right: 10px;
+}
+
+.qty-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+}
+
+button {
+    padding: 6px 10px;
+    cursor: pointer;
+}
+
+.qty-btn {
+    background: black;
+    color: white;
+    border: none;
+}
+
+.remove-btn {
+    background: red;
+    color: white;
+    border: none;
+}
+
+#checkout-btn {
+    background: green;
+    color: white;
+    border: none;
+    margin-top: 10px;
+}
+
+#clear-btn {
+    background: black;
+    color: white;
+    border: none;
+    margin-top: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Your Cart 🛒</h1>
+
+<div id="cart-items"></div>
+
+<h3>Total: ₹<span id="total">0</span></h3>
+
+<button id="checkout-btn" onclick="checkout()">Proceed to Checkout</button>
+<button id="clear-btn" onclick="clearCart()">Clear Cart</button>
+
+<script>
+
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+// 🔥 GROUP BY QUANTITY
+function groupCart() {
+    let grouped = [];
+
+    cart.forEach(item => {
+        let found = grouped.find(p => p.name === item.name);
+
+        if (found) {
+            found.qty += 1;
+        } else {
+            grouped.push({ ...item, qty: 1 });
+        }
+    });
+
+    return grouped;
+}
+
+// 🔥 DISPLAY CART
+function displayCart() {
+    let box = document.getElementById("cart-items");
+    box.innerHTML = "";
+
+    let grouped = groupCart();
+    let total = 0;
+
+    grouped.forEach(item => {
+
+        let price = item.discount
+            ? item.price - (item.price * item.discount / 100)
+            : item.price;
+
+        total += price * item.qty;
+
+        box.innerHTML += `
+            <div class="cart-item">
+                <img src="${item.image}">
+
+                <div>
+                    <h4>${item.name}</h4>
+                    <p>₹${Math.round(price)} each</p>
+                </div>
+
+                <div class="qty-box">
+                    <button class="qty-btn" onclick="changeQty('${item.name}', -1)">-</button>
+                    <span>${item.qty}</span>
+                    <button class="qty-btn" onclick="changeQty('${item.name}', 1)">+</button>
+                </div>
+
+                <button class="remove-btn" onclick="removeItem('${item.name}')">
+Remove
+</button>
+            </div>
+        `;
+    });
+
+    document.getElementById("total").innerText = Math.round(total);
+}
+
+// 🔥 CHANGE QUANTITY
+function changeQty(name, val) {
+
+    let index = cart.findIndex(p => p.name === name);
+
+    if (val === -1) {
+        if (index !== -1) {
+            cart.splice(index, 1);
+        }
+    } else {
+        let item = cart.find(p => p.name === name);
+        if (item) {
+            cart.push(item);
+        }
+    }
+
+    localStorage.setItem("cart", JSON.stringify(cart));
+    displayCart();
+}
+
+// 🔥 REMOVE ITEM COMPLETELY
+function removeItem(name) {
+    cart = cart.filter(p => p.name !== name);
+    localStorage.setItem("cart", JSON.stringify(cart));
+    displayCart();
+}
+
+// 🔥 CLEAR CART (FIXED)
+function clearCart() {
+    cart = [];
+    localStorage.setItem("cart", JSON.stringify(cart));
+    displayCart();
+}
+
+// 🔥 CHECKOUT
+function checkout() {
+    if (cart.length === 0) {
+        alert("Cart is empty!");
+        return;
+    }
+
+    window.location.href = "checkout.html";
+}
+
+// INIT
+displayCart();
+
+</script>
+ <script src="js/cart.js"></script>
+<div id="toast">Added to cart ✔️</div>
+</body>
+</html>

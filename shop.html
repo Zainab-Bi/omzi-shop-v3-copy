@@ -1,0 +1,254 @@
+ <!DOCTYPE html>
+<html>
+<head>
+    <title>Omzi Shop</title>
+    <link rel="stylesheet" href="css/style.css">
+
+    <style>
+        body {
+            font-family: Arial;
+        }
+
+        body.dark-mode {
+            background: #121212;
+            color: white;
+        }
+
+        body.dark-mode .product {
+            background: #1f1f1f;
+            color: white;
+        }
+
+        body.dark-mode input,
+        body.dark-mode select {
+            background: #333;
+            color: white;
+        }
+
+        /* FIXED: 3 columns layout */
+        #product-list {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            justify-content: center;
+            padding: 10px;
+        }
+.product {
+    width: 200px;              /* same fixed card width */
+    background: white;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    min-height: 420px;         /* same height consistency */
+}
+         
+
+         .product img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    border-radius: 8px;
+}
+    
+        .review-box {
+            margin-top: 8px;
+            padding: 6px;
+            background: rgba(0,0,0,0.05);
+            border-radius: 6px;
+            font-size: 12px;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav>
+    <h2>Omzi Shop</h2>
+
+    <input type="text" id="search" placeholder="Search products...">
+
+    <button onclick="toggleDarkMode()">🌙</button>
+
+    <a href="index.html">Home</a>
+    <a href="cart.html">Cart</a>
+    <span id="cart-count"></span>
+    <a href="wishlist.html">
+  ❤️ Wishlist (<span id="wishlist-count">0</span>)
+</a>
+</nav>
+
+<h2 style="text-align:center;">All Products</h2>
+
+<div id="product-list"></div>
+
+<script>
+    function toggleWishlist(product) {
+
+  let wishlist =
+    JSON.parse(localStorage.getItem("wishlist")) || [];
+
+  let exists =
+    wishlist.find(p => p.name === product.name);
+
+  if (exists) {
+    wishlist =
+      wishlist.filter(p => p.name !== product.name);
+  } else {
+    wishlist.push(product);
+  }
+
+  localStorage.setItem(
+    "wishlist",
+    JSON.stringify(wishlist)
+  );
+
+  alert("Wishlist updated ❤️");
+}
+
+let searchText = "";
+
+/* SEARCH */
+document.getElementById("search").addEventListener("input", (e) => {
+    searchText = e.target.value.toLowerCase();
+    displayProducts();
+});
+
+/* DEFAULT PRODUCTS */
+if (!localStorage.getItem("products")) {
+    localStorage.setItem("products", JSON.stringify([
+        { name: "Heels", price: 999, discount: 20, image: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=500" },
+        { name: "Smart Watch", price: 799, discount: 15, image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500" },
+        { name: "Hand Bag", price: 499, discount: 10, image: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=500" }
+    ]));
+}
+
+/* DARK MODE */
+function toggleDarkMode() {
+    document.body.classList.toggle("dark-mode");
+}
+
+/* DISPLAY */
+function displayProducts() {
+
+    let products = JSON.parse(localStorage.getItem("products")) || [];
+
+    if (searchText) {
+        products = products.filter(p =>
+            (p.name || "").toLowerCase().includes(searchText)
+        );
+    }
+
+    const list = document.getElementById("product-list");
+    list.innerHTML = "";
+
+    products.forEach((product, index) => {
+
+        let discount = product.discount || 0;
+
+        let finalPrice = discount
+            ? Math.round(product.price - (product.price * discount / 100))
+            : product.price;
+
+        let reviewsHTML = "";
+
+        if (product.reviews && product.reviews.length > 0) {
+            product.reviews.forEach(r => {
+                reviewsHTML += `<p>⭐ ${"★".repeat(r.rating)} ${r.text}</p>`;
+            });
+        } else {
+            reviewsHTML = `<p style="color:gray;">No reviews yet</p>`;
+        }
+
+        let div = document.createElement("div");
+        div.classList.add("product");
+
+        div.innerHTML = `
+            <h3>${product.name}</h3>
+
+            <img src="${product.image}">
+
+            <p>
+                <del>₹${product.price}</del>
+                <b style="color:red;">₹${finalPrice}</b>
+                ${discount ? `<span style="color:green;"> (${discount}% OFF)</span>` : ""}
+            </p>
+
+            <button onclick="addToCart(${index})">Add to Cart</button>
+            <button onclick='toggleWishlist(${JSON.stringify(product)})'>
+  ❤️ Wishlist
+</button>
+
+            <div style="margin-top:8px;">
+                <select id="rating-${index}">
+                    <option value="5">⭐⭐⭐⭐⭐</option>
+                    <option value="4">⭐⭐⭐⭐</option>
+                    <option value="3">⭐⭐⭐</option>
+                    <option value="2">⭐⭐</option>
+                    <option value="1">⭐</option>
+                </select>
+
+                <input type="text" id="review-${index}" placeholder="Write review">
+                <button onclick="addReview(${index})">Submit</button>
+            </div>
+
+            <div class="review-box">${reviewsHTML}</div>
+        `;
+
+        list.appendChild(div);
+    });
+}
+
+
+/* ADD REVIEW */
+function addReview(index) {
+    const text = document.getElementById(`review-${index}`).value;
+    const rating = document.getElementById(`rating-${index}`).value;
+
+    if (!text) return alert("Write review!");
+
+    let products = JSON.parse(localStorage.getItem("products")) || [];
+
+    if (!products[index].reviews) {
+        products[index].reviews = [];
+    }
+
+    products[index].reviews.push({ text, rating });
+
+    localStorage.setItem("products", JSON.stringify(products));
+
+    displayProducts();
+}
+
+/* CART */
+function addToCart(index) {
+    let products = JSON.parse(localStorage.getItem("products")) || [];
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    cart.push(products[index]);
+
+    localStorage.setItem("cart", JSON.stringify(cart));
+}
+
+/* INIT */
+displayProducts();
+
+</script>
+ <script src="script.js"></script>
+<div id="toast">Added to cart ✔️</div>
+ <script>
+function updateWishlistCount() {
+  document.getElementById("wishlist-count").innerText =
+    (JSON.parse(localStorage.getItem("wishlist")) || []).length;
+}
+
+updateWishlistCount();
+</script>
+</body>
+</html>

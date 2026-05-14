@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Omzi Checkout</title>
+    <link rel="stylesheet" href="css/style.css">
+
+    <style>
+        body { font-family: Arial; padding: 20px; }
+
+        .box {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: black;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .item {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+        }
+
+        .total {
+            font-weight: bold;
+            font-size: 18px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="box">
+    <h2>🛒 Checkout</h2>
+
+    <h3>Order Summary</h3>
+    <div id="cart-items"></div>
+
+    <p class="total">Total: ₹<span id="total">0</span></p>
+
+    <h3>Delivery Address</h3>
+    <input type="text" id="name" placeholder="Full Name">
+    <input type="text" id="address" placeholder="Address">
+    <input type="text" id="city" placeholder="City">
+    <input type="text" id="phone" placeholder="Phone">
+
+    <h3>Payment Method</h3>
+    <select id="payment">
+        <option value="COD">Cash on Delivery</option>
+        <option value="Card">Card (Demo)</option>
+    </select>
+
+    <button onclick="placeOrder()">Place Order</button>
+</div>
+
+<script>
+
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+let total = 0;
+
+// SHOW CART ITEMS
+function loadCart() {
+    let box = document.getElementById("cart-items");
+
+    cart.forEach(item => {
+        let price = item.price - (item.price * (item.discount || 0) / 100);
+        total += price;
+
+        box.innerHTML += `
+            <div class="item">
+                <span>${item.name}</span>
+                <span>₹${Math.round(price)}</span>
+            </div>
+        `;
+    });
+
+    document.getElementById("total").innerText = Math.round(total);
+}
+
+// PLACE ORDER
+function placeOrder() {
+
+    let name = document.getElementById("name").value;
+    let address = document.getElementById("address").value;
+    let city = document.getElementById("city").value;
+    let phone = document.getElementById("phone").value;
+    let payment = document.getElementById("payment").value;
+
+    if (!name || !address || !city || !phone) {
+        alert("Fill all details!");
+        return;
+    }
+
+    let order = {
+        name,
+        address,
+        city,
+        phone,
+        payment,
+        cart,
+        total
+    };
+
+    localStorage.setItem("order", JSON.stringify(order));
+
+    // clear cart
+    localStorage.removeItem("cart");
+
+    alert("Order placed successfully!");
+
+    window.location.href = "success.html";
+}
+
+loadCart();
+
+</script>
+<script src="script.js"></script>
+<div id="toast">Added to cart ✔️</div>
+</body>
+</html>
