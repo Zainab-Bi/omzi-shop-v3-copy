@@ -1,46 +1,74 @@
-// Load cart from localStorage
-let products = JSON.parse(localStorage.getItem("products")) || [];s
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-// References
 let cartContainer = document.getElementById("cart-items");
 let totalEl = document.getElementById("total");
-let cartCountEl = document.getElementById("cart-count");
 
-// Display cart items
 function displayCart() {
+
     cartContainer.innerHTML = "";
+
     let total = 0;
 
     if (cart.length === 0) {
+
         cartContainer.innerHTML = "<p>Your cart is empty ❤️</p>";
+
     } else {
-        cart.forEach(id => {
-            let product = products.find(p => p.id === id);
-            if (product) {
-                total += product.price;
-                cartContainer.innerHTML += `
-                    <div class="cart-item">
-                        <img src="${product.image}" alt="${product.name}" onerror="this.src='images/placeholder.jpg'">
-                        <div>
-                            <h4>${product.name}</h4>
-                            <p><span class="price">₹${product.price}</span> <span class="old-price">₹${product.oldPrice}</span></p>
-                        </div>
-                        <button onclick="removeFromCart(${product.id})">Remove</button>
+
+        cart.forEach((product, index) => {
+
+            let finalPrice = product.discount
+                ? Math.round(product.price - (product.price * product.discount / 100))
+                : product.price;
+
+            total += finalPrice;
+
+            cartContainer.innerHTML += `
+                <div class="cart-item">
+
+                    <img src="${product.image}">
+
+                    <div>
+                        <h4>${product.name}</h4>
+
+                        <p>
+                            ₹${finalPrice}
+                        </p>
                     </div>
-                `;
-            }
+
+                    <button onclick="removeFromCart(${index})">
+                        Remove
+                    </button>
+
+                </div>
+            `;
         });
     }
 
     totalEl.innerText = total;
-    cartCountEl.innerText = cart.length;
 }
 
-// Remove single item
- function updateCartCount() {
 
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+// REMOVE
+function removeFromCart(index) {
 
-    document.getElementById("cart-count").innerText = cart.length;
+    cart.splice(index, 1);
+
+    localStorage.setItem("cart", JSON.stringify(cart));
+
+    displayCart();
 }
+
+
+// CLEAR
+function clearCart() {
+
+    cart = [];
+
+    localStorage.setItem("cart", JSON.stringify(cart));
+
+    displayCart();
+}
+
+
+displayCart();
