@@ -48,8 +48,17 @@ function displayCart() {
     totalEl.innerText = total;
 }
 
+function updateCartCount() {
 
-// REMOVE
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    let countEl = document.getElementById("cart-count");
+
+    if(countEl){
+        countEl.innerText = cart.length;
+    }
+}
+
 function removeFromCart(index) {
 
     cart.splice(index, 1);
@@ -57,8 +66,9 @@ function removeFromCart(index) {
     localStorage.setItem("cart", JSON.stringify(cart));
 
     displayCart();
-}
 
+    updateCartCount();
+}
 
 // CLEAR
 function clearCart() {
@@ -68,6 +78,8 @@ function clearCart() {
     localStorage.setItem("cart", JSON.stringify(cart));
 
     displayCart();
+
+    updateCartCount();
 }
 
 
